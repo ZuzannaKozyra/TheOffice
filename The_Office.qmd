@@ -1,0 +1,418 @@
+---
+title: "The Office"
+author: "Zuzanna Kozyra"
+format: 
+  html:
+    warning: false
+    message: false
+    echo: false
+    self-contained: true
+    toc: true
+    toc-location: left
+    toc-title: Spis treści
+editor: visual
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
+---
+
+## Wprowadzenie
+
+*The Office* to [mockument](https://dobryslownik.pl/slowo/mockument/222372/ "definicja") *(* *ang. mockumentary )* stworzony przez Ricky'ego Gervaisa i Stephena Merchanta, początkowo w Wielkiej Brytanii, potem w Niemczech, a następnie w wielu innych krajach, co pokazuje [Tabela. -@tbl-overcountries] .
+
+```{r}
+#| tbl-cap: "Zestawienie krajów, w których wyemitowano serial"
+#| label: tbl-overcountries
+
+library(tidyverse)
+library(rstatix)
+library(gtsummary)
+library(gt)
+library(readxl)
+
+overcountries <- read_excel("overcountries.xlsx")
+
+gt(overcountries)
+```
+
+Ten raport będzie skupiał się na statystykach dotyczących edycji amerykańskiej. Poniżej znajduje się jej logo.
+
+### 
+
+[![Logo serialu](1920px-The_Office_US_logo.svg.png)](https://en.wikipedia.org/wiki/The_Office_(American_TV_series))
+
+Serial ma także piosenkę przewodnią, graną podczas *intro* każdego odcinka, której możemy posłuchać [tutaj](https://en.wikipedia.org/wiki/File:The_Office_Theme_Song.ogg "piosenka przewodnia"). Została skomponowana przez artystę [Jay'a Fergusona](https://en.wikipedia.org/wiki/Jay_Ferguson_(American_musician) "biografia").
+
+Producenci wykonawczy zmieniali się. Od 1 do 4 sezonu był nim [Greg Daniels](https://en.wikipedia.org/wiki/Greg_Daniels "biografia"), od 5 do 6 [Paul Lieberstein](https://en.wikipedia.org/wiki/Paul_Lieberstein "biografia") (wcielił się również w postać Toby'ego) i [Jennifer Celotta](https://en.wikipedia.org/wiki/Jennifer_Celotta "biografia"), od 7 do 8 Paul Lieberstein, a w 9 (ostatnim) sezonie ponownie Greg Daniels.
+
+Fabuła serialu opowiada o perypetiach pracowników biura regionalnego firmy papierniczej Dunder Mifflin w Scranton w Pensylwanii - [Rysunek. -@fig-map] . Jednak w rzeczywistości biuro nie istnieje. Kierownikiem jest ekscentryczny, samolubny, ale też zabawny Michael Scott. Obiektem jego niewybrednych żartów jest w pierwszej kolejności cicha, lecz czarująca recepcjonistka Pam Beesly. Piątkę głównych bohaterów uzupełniają też podlizujący się szefowi Dwight Schrute, utalentowany sprzedawca Jim Halpert oraz obojętny na wszystko pracownik tymczasowy Ryan Howard.
+
+```{r}
+#| fig-cap: "Mapa Scranton, Pensylwania z zaznaczonym miejscem, gdzie jest serialowe biuro"
+#| label: fig-map
+
+library(osmdata)
+library(leaflet)
+library(sf)
+
+m <- leaflet() %>% 
+  setView(lng = 153.05, lat = 41.4042, zoom = 12) 
+
+leaflet(m) %>%
+  addCircleMarkers(
+    lng=-75.662412,
+    lat=41.408969,
+    fillColor = "lightblue",
+    fillOpacity = 1,
+    stroke = F
+  ) %>%
+  addProviderTiles("CartoDB.Positron")
+```
+
+## Obsada
+
+### Główni bohaterzy
+
+-   Michael Gary Scott - kierownik regionalny, w postać wcielił się Steve Carell
+
+    [![](MichaelScott.png)](https://en.wikipedia.org/wiki/Michael_Scott_(The_Office))
+
+-   Dwight Kurt Schrute - sprzedawca i asystent kierownika regionalnego, zagrany przez Rainna Wilsona
+
+    [![](Dwight_Schrute.jpg)](https://en.wikipedia.org/wiki/Dwight_Schrute)
+
+-   Jim Halpert - sprzedawca, w postać wcielił się John Krasinski
+
+    [![](Jim-halpert.jpg)](https://en.wikipedia.org/wiki/Jim_Halpert)
+
+-   Pamela Morgan Beesely - recepcjonistka, grana przez Jennę Fischer
+
+    [![](Pam_Beesley.jpg)](https://en.wikipedia.org/wiki/Pam_Beesly)
+
+-   Ryan Howard - ambitny stażysta, w postać wcielił się B. J. Novak
+
+    [![](Ryan_Howard.jpg)](https://en.wikipedia.org/wiki/Ryan_Howard_(The_Office))
+
+### Pozostali bohaterowie
+
+```{r}
+#| tbl-cap: Pozostali bohaterowie serialu
+#| label: tbl-castother
+
+library(readxl)
+
+cast_other <- read_excel('cast_other.xlsx')
+gt(cast_other)
+```
+
+## Wypowiedzi postaci
+
+```{r}
+#| tbl-cap: "Wypowiedzi postaci uporządkowane od 1 sezonu"
+#| label: tbl-lineshead
+
+library(readxl)
+library(knitr)
+library(gt)
+library(DT)
+
+lines <- read_excel("The_Office_Lines.xlsx")
+
+lines <- data.frame(subset(lines, deleted == "FALSE", select = season:speaker))
+
+lines <- setNames(lines, c("Sezon", "Odcinek", "Kwestia", "Postać"))
+
+#Poniższa tabela zawiera dane dotyczące wypowiedzi poszczególnych postaci w każdym sezonie i odcinku.
+#datatable(lines)
+```
+
+### Ilość wypowiedzi
+
+Tabela przedstawiona poniżej przedstawia ilość wypowiedzi danych aktorów w serialu, jest uporządkowana malejąco względem ilości wypowiedzianych sentencji.
+
+```{r}
+#| tbl-cap: "Ilość wypowiedzi poszczególnych postaci"
+#| label: tbl-totallines
+
+library(dplyr)
+library(DT)
+
+z <- data.frame(lines %>% 
+  group_by(Postać) %>% 
+  summarise(Ilość = n(), .groups = 'drop') %>% 
+  arrange(-Ilość))
+
+datatable(z)
+```
+
+Najwięcej wypowiedzi podczas serialu ma Michael Scott - aż 11585 - [Rysunek. -@fig-totallines], a jest wiele postaci, które wystąpiły tylko raz. Średnia ilość na osobę to 74.997 wypowiedzi - [Tabela. -@tbl-basicstats] .
+
+```{r}
+#| tbl-cap: Podstawowe statystyki dotyczące wypowiedzi postaci
+#| label: tbl-basicstats
+
+library(tidyverse)
+library(rstatix)
+library(gtsummary)
+library(gt)
+
+basicstats <- z %>%
+  get_summary_stats(show = c("n", "min", "max", "mean"))
+
+basicstats <- setNames(basicstats, c("Zmienna", "Ilość", "Najmniejsza wartość", "Największa wartość", "Średnia"))
+
+gt(basicstats)
+```
+
+```{r}
+#| fig-cap: Wykres ilości wypowiedzi trzydziestu najczęściej wypowiadających się postaci
+#| label: fig-totallines
+
+library(ggplot2)
+library(plotly)
+library(ggstatsplot)
+
+wykres_totallines <- z %>% 
+  filter(Ilość > 108) %>%
+  ggplot(aes(x = Postać, y = Ilość))+
+  geom_point(color = "lightblue")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))+
+  labs(y = "Ilość wypowiedzi")
+
+ggplotly(wykres_totallines)
+```
+
+### Ilość wypowiedzi a udział w sezonach - pracownicy biura
+
+```{r}
+library(rstatix)
+library(plotly)
+library(correlation)
+
+seasontotal <- read_excel("seasontotal.xlsx")
+
+z_filter <- z %>% 
+  filter(Postać == "Michael" | Postać == "Jim" | Postać == "Pam" | Postać == "Holly" | Postać == "Erin" | Postać == "Ryan" | Postać == "Karen" | Postać == "Dwight" | Postać == "Andy" | Postać == "Angela" | Postać == "Oscar" | Postać == "Kevin" | Postać == "Creed" | Postać == "Toby" | Postać == "Stanley" | Postać == "Phyllis" | Postać == "Kelly") %>% 
+  arrange(Postać)
+
+seasontotal <- seasontotal %>% 
+  arrange(Postać)
+
+season_lines <- data.frame(matrix(c(z_filter$Postać, seasontotal$`Liczba sezonów`, z_filter$Ilość), byrow = F, nrow = 17))
+
+season_lines <- setNames(season_lines, c("Postać", "Liczba sezonów", "Liczba wypowiedzi"))
+
+season_lines$`Liczba wypowiedzi` <- as.numeric(as.vector(season_lines$`Liczba wypowiedzi`))
+season_lines$`Liczba sezonów` <- as.numeric(as.vector(season_lines$`Liczba sezonów`))
+```
+
+Z wykresu - [Rysunek. -@fig-seasonlines] wynika, że można przyjąć hipotezę, że nie ma zasady ani znaczącej zależności między ilością sezonów, w których bohater wystąpił a liczbą jego wypowiedzi. Widać to między innymi na przykładzie Erin i Ryana (Ryan wystąpił w 5 sezonach więcej od Erin, a ma porównywalną ilość tekstów) oraz Creeda (pojawił się we wszystkich sezonach, ale jego wypowiedzi jest niewiele).
+
+```{r}
+#| fig-cap: "Wykres zależności między ilością wypowiedzi a ilością sezonów, w których były dane postacie"
+#| label: fig-seasonlines
+
+wykres3 <- season_lines %>% 
+  ggplot(aes(x = `Liczba sezonów`, y = `Liczba wypowiedzi`, color = Postać))+
+  geom_point(size = 5)+
+  scale_colour_manual(values = c("#CCE5FF", "#99CCFF", "#66B2FF", "#3399FF", "#0080FF", "#0066CC", "#004C99", "#003366", "#001933", "#CCFFFF", "#99FFFF", "#66FFFF", "#33FFFF", "#00FFFF", "#00CCCC", "#009999", "#006666"))+
+  theme_minimal()
+
+ggplotly(wykres3) %>% 
+  layout(showlegend = FALSE)
+```
+
+Współczynnik korelacji liniowej Pearsona wynosi w zaokrągleniu 0,18 - [Tabela. -@tbl-pearson], co oznacza, że siła korelacji jest niewyraźna - nie występuje współzależność między liczbą sezonów a liczbą wypowiedzi danych postaci.
+
+"**Współczynnik korelacji liniowej Pearsona** mówi nam jaka jest **siła** i **kierunek** zależności liniowej pomiędzy 2 zmiennymi -- x i y. **Współczynnik r** przyjmuje wartości z przedziału \[-1,1\]
+
+-   Im wartość **bliższa** 1 tym zależność jest **silniejsza i dodatnia** (jeżeli x rośnie to y rośnie),
+
+-   Im wartość **bliższa** -1 tym zależność jest **silniejsza i ujemna** (jeżeli x rośnie to y maleje),
+
+-   r=0 oznacza **brak związku** liniowego pomiędzy zmiennymi."
+
+[@gren_statystyka_1975], [@stanislawek_podstawy_2006]
+
+```{r}
+#| tbl-cap: Współczynnik korelacji liniowej Pearsona
+#| label: tbl-pearson
+
+season_lines %>% 
+  select(-Postać) %>% 
+  cor_test(x = "Liczba sezonów", y = "Liczba wypowiedzi", method = "pearson") %>% 
+  select(Parameter1:r) %>% 
+  setNames(c("Parametr 1", "Parametr 2", "r")) %>% 
+  gt()
+```
+
+### Serialowy *inside joke*
+
+*The Office* jest też bardzo znane z serialowego *inside joke* ( żart środowiskowy ), który brzmi: "That's what she said". [Rysunek. -@fig-gshesaid] to graf ważony skierowany, który przedstawia użycie tego żartu przez bohaterów. Waga/ grubość krawędzi w grafie oznacza jak wiele razy wystąpiło dane połączenie. Wierzchołkami są dane postacie serialu zaangażowane w te połączenia.
+
+"**Graf** -- struktura *G = (V, E)* składająca się ze skończonego zbioru wierzchołków *V* oraz skończonego zbioru krawędzi *E*, gdzie każda krawędź e ∈ E jest dwuelementowym zbiorem wierzchołków u, v ∈ V. Wierzchołki *u, v* połączone krawędzią *e = {u, v}* określane są sąsiednimi.
+
+Powyższa definicja dotyczy **grafu nieskierowanego**, gdzie relacja sąsiedztwa jest symetryczna, tzn. krawędź łączy wierzchołki „w obie strony". W grafie **skierowanym** krawędzie są „jednokierunkowe".
+
+**Graf ważony** (inaczej **graf z wagami**) to taki graf, w którym każdej krawędzi przypisana jest pewna wartość liczbowa".
+
+[@wilson_wprowadzenie_2012]
+
+```{r}
+library(igraph)
+
+m <- matrix(c(17,5,1,1,3,0,1,2,3,0,1,2,0,0,1,1,
+         1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+         1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), byrow=T, ncol=16)
+
+g <- graph.adjacency(m, mode = 'directed', weighted = T)
+
+V(g)$name <- c("Michael", "Jim", "Pam", "Kevin", "Dwight", "Doctor", "Oscar", "Angela", "Jan", "Stanley", "Lawyer", "Holly", "Kelly", "David", "Darryl", "Gabe")
+```
+
+```{r}
+mat <- matrix(c("Michael", "Michael", 17,
+         "Michael", "Jim", 5,
+         "Michael", "Pam", 1,
+         "Michael", "Kevin", 1,
+         "Michael", "Dwight", 3,
+         "Michael", "Oscar", 1, 
+         "Michael", "Angela", 2,
+         "Michael", "Jan", 3,
+         "Michael", "Lawyer", 1,
+         "Michael", "Holly", 2,
+         "Michael", "Darryl", 1,
+         "Michael", "Gabe", 1,
+         "Jim", "Michael", 1,
+         "Jim", "Dwight", 1,
+         "Pam", "Kelly", 1,
+         "Dwight", "Michael", 1,
+         "Dwight", "Doctor", 1,
+         "Dwight", "David", 1,
+         "Oscar", "Michael", 1,
+         "Jan", "Jan", 1,
+         "Stanley", "Michael", 1,
+         "Holly", "Holly", 1), byrow = T, ncol = 3)
+
+mat <- data.frame(mat)
+```
+
+```{r}
+#| fig-cap: "Graf ważony skierowany - kto komu odpowiedział serialowym żartem"
+#| label: fig-gshesaid
+
+
+nodes = data.frame(id = matrix(c("Michael", "Jim", "Pam", "Kevin", "Dwight", "Oscar", "Angela", "Jan", "Lawyer", "Darryl", "Gabe", "Kelly", "Doctor", "David", "Stanley", "Holly"), ncol = 1), label = c("Michael", "Jim", "Pam", "Kevin", "Dwight", "Oscar", "Angela", "Jan", "Lawyer", "Darryl", "Gabe", "Kelly", "Doctor", "David", "Stanley", "Holly"))
+edges = data.frame(from = mat[,1], to = mat[,2], value = mat[,3])
+
+library(visNetwork)
+
+visNetwork(nodes, edges) %>% 
+  visEdges(arrows = "to")%>%
+  visIgraphLayout(layout = "layout_in_circle")%>% 
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+```
+
+Wierzchołek reprezentujący postać Michaela ma największy stopień wchodzący oraz wychodzący, co oznacza, że użył oraz usłyszał żart najwięcej razy ze wszystkich - [Tabela. -@tbl-degree].
+
+"**Stopień wierzchołka** -- liczba krawędzi grafu incydentnych do wierzchołka. Jest on równy sumie liczb wszystkich łuków wchodzących, wychodzących, krawędzi i pętli; W grafach skierowanych można też wyróżnić stopień wchodzący i stopień wychodzący. Są to odpowiednio liczby łuków wchodzących do i wychodzących z wierzchołka."
+
+[@diestel_graph_nodate]
+
+```{r}
+#| tbl-cap: Stopnie wierzchołków
+#| label: tbl-degree
+
+d <- degree(g)
+d_in <- degree(g, mode = 'in')
+d_out <- degree(g, mode = 'out')
+names <- c("Michael", "Jim", "Pam", "Kevin", "Dwight", "Doctor", "Oscar", "Angela", "Jan", "Stanley", "Lawyer", "Holly", "Kelly", "David", "Darryl", "Gabe")
+
+degree <- data.frame(names, d, d_in, d_out)
+degree <- setNames(degree, c("Postać", "Stopień", "Stopień wchodzący", "Stopień wychodzący"))
+
+degree %>% 
+  arrange(-Stopień) %>% 
+  gt()
+```
+
+## Oglądalność
+
+Dane - [Tabela. -@tbl-views] - pochodzą z raportów amerykańskiej firmy [*Nielsen Media Research*](https://en.wikipedia.org/wiki/Nielsen_Media_Research)*,* która zajmuje się zbieraniem informacji o oglądalnościach różnych seriali i filmów oraz tworzeniem rankingów.
+
+Najwięcej odcinków miał 5 sezon, a najmniej pierwszy - to właśnie on zdobył najwyższy ranking oglądalności (wg rankingu Nielsena) - [Tabela. -@tbl-views]. Biorąc pod uwagę średnią ilość widzów danego sezonu, to najlepiej oglądanym był piąty. Można więc zauważyć, że ranking oglądalności i średnia ilość widzów nie zawsze są jednocześnie wysokie. [Wykres. -@fig-rank] również pokazuje, że ciężko zdefiniować konkretny trend zależności między nimi.
+
+```{r}
+#| tbl-cap: Podstawowe dane dotyczące oglądalności The Office
+#| label: tbl-views
+
+ranks <- read.csv("ranks.csv")
+ranks <- ranks[,-1]
+
+ranks <- setNames(ranks, c("Sezon", "Liczba odcinków", "Pierwsze wyemitowanie - liczba widzów [mln]", "Ostatnie wyemitowanie - liczba widzów [mln]", "Ranking oglądalności", "Średnia ilość widzów [mln]"))
+
+gt(ranks) %>% 
+  cols_width(c(Sezon) ~ px(50), c(`Liczba odcinków`) ~ px(75), c(`Pierwsze wyemitowanie - liczba widzów [mln]`) ~ px(200), c(`Ostatnie wyemitowanie - liczba widzów [mln]`) ~ px(200), c(`Ranking oglądalności`) ~ px(100), c(`Średnia ilość widzów [mln]`) ~ px(100))
+```
+
+```{r}
+#| fig-cap: Wykres zależności rankingu oglądalności i średniej ilości widzów
+#| label: fig-rank
+
+ggplotly(ranks %>% 
+  ggplot(aes(y = `Ranking oglądalności`, x = `Średnia ilość widzów [mln]`))+
+  geom_point(size = 3)+
+  geom_smooth()+
+  theme_minimal())
+  
+```
+
+[Wykres. -@fig-views] przedstawia porównanie oglądalności pierwszego i ostatniego wyemitowania serialu. Widać, że podczas premiery pierwszych sezonów widzowie byli bardziej zainteresowani niż, gdy emitowano serial ostatni raz. Za pierwszym razem oglądalność miała więcej tendencji spadkowych, a między pierwszym a dziewiątym sezonem było aż 6,92 mln różnicy w ilości widzów. Jedynie ostatni raz wyemitowany dziewiąty sezon przerósł oglądalnością swoją premierę - reszta była znacząco niższa.
+
+```{r}
+#| fig-cap: Porównanie oglądalności podczas pierwszego i ostatniego emitowania serialu
+#| label: fig-views
+w <- ranks %>% 
+ ggplot(aes(x = Sezon, y = `Pierwsze wyemitowanie - liczba widzów [mln]`))+
+  geom_line()+
+  geom_point()+
+  theme_minimal()+
+  scale_x_continuous(n.breaks = 9)+
+  scale_y_continuous(n.breaks = 12)+
+  ylim(c(4,12))
+
+m <- ranks %>% 
+ ggplot(aes(x = Sezon, y = `Ostatnie wyemitowanie - liczba widzów [mln]`))+
+  geom_line()+
+  geom_point()+
+  theme_minimal()+
+  scale_x_continuous(n.breaks = 9)+
+  ylim(c(4,12))
+
+library(cowplot)
+plot_grid(w, m)
+```
+
+## Podsumowanie
+
+*The Office* od wielu lat rośmiesza i rozczula wiele milonów widzów. Nie zawsze osiągał wysokie wyniki rankingowe, ale z pewnością odniósł ogromny sukces. Obecnie nie jest już emitowany w telewizji, ale można go obejrzeć na wielu platformach online.
+
+## Źródła
+
+<https://theoffice.fandom.com/wiki/Main_Page>
+
+<https://en.wikipedia.org/wiki/The_Office_(American_TV_series)>
